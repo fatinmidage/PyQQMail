@@ -1,10 +1,8 @@
 import imaplib
 import email
 from email.header import decode_header
-import os
 from typing import Optional, List, Dict
-import yaml
-import sys
+from config import load_config
 
 class QQMail:
     def __init__(self, email_address: str = None, password: str = None):
@@ -14,7 +12,7 @@ class QQMail:
         :param password: 邮箱授权码（可选，如果不提供则从配置文件读取）
         """
         if email_address is None or password is None:
-            config = self._load_config()
+            config = load_config()
             self.email_address = email_address or config['email']['address']
             self.password = password or config['email']['password']
         else:
@@ -24,34 +22,6 @@ class QQMail:
         self.imap_server = "imap.qq.com"
         self.imap_port = 993
         self.connection: Optional[imaplib.IMAP4_SSL] = None
-
-    def _load_config(self) -> dict:
-        """
-        从配置文件加载邮箱配置
-        :return: 配置信息字典
-        """
-        # 获取可执行文件的实际路径
-        if getattr(sys, 'frozen', False):
-            # 如果是打包后的可执行文件
-            executable_path = sys.executable
-            config_path = os.path.join(os.path.dirname(executable_path), 'config.yaml')
-        else:
-            # 如果是直接运行 Python 脚本
-            config_path = os.path.join(os.path.dirname(__file__), 'config.yaml')
-        
-        if not os.path.exists(config_path):
-            raise Exception("配置文件不存在，请先创建 config.yaml 文件")
-        
-        with open(config_path, 'r', encoding='utf-8') as f:
-            config = yaml.safe_load(f)
-        
-        if not config or 'email' not in config:
-            raise ValueError("配置文件格式错误")
-        
-        if not config['email']['address'] or not config['email']['password']:
-            raise ValueError("请在配置文件中填写邮箱地址和授权码")
-        
-        return config
 
     def connect(self) -> bool:
         """
@@ -161,40 +131,4 @@ class QQMail:
             return mail_list
         except Exception as e:
             print(f"获取邮件列表失败: {str(e)}")
-            return []
-
-def main():
-    try:
-        qq_mail = QQMail()
-    except (FileNotFoundError, ValueError) as e:
-        print(f"配置错误: {str(e)}")
-        return
-    
-    if qq_mail.connect():
-        print("登录成功！")
-        
-        # 获取最新的5封邮件
-        mails = qq_mail.get_mail_list(limit=5)
-        print("\n最新的5封邮件：")
-        for mail in mails:
-            print(f"\n主题: {mail['subject']}")
-            print(f"发件人: {mail['from']}")
-            print(f"日期: {mail['date']}")
-            
-            # 判断是否是交通银行信用卡中心的邮件
-            if "交通银行信用卡中心" in mail['from']:
-                print("\n发现交通银行信用卡中心的邮件，正在获取内容...")
-                content = qq_mail.get_mail_content(mail['id'])
-                print("\n邮件内容：")
-                print("-" * 50)
-                print(content)
-                print("-" * 50)
-            
-            print("-" * 50)
-        
-        qq_mail.disconnect()
-    else:
-        print("登录失败！")
-
-if __name__ == "__main__":
-    main() 
+            return [] 
