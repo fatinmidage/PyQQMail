@@ -19,8 +19,8 @@ def main():
             print(f"日期: {mail['date']}")
             
             # 判断是否是交通银行信用卡中心的邮件
-            if "交通银行信用卡中心" in mail['from']:
-                print("\n发现交通银行信用卡中心的邮件，正在获取内容...")
+            if "pccc@bocomcc.com" in mail['from_email'] and "电子账单" in mail['subject']:
+                print("\n发现交通银行信用卡中心的电子账单邮件，正在获取内容...")
                 content = qq_mail.get_mail_content(mail['id'])
                 print("\n邮件内容：")
                 print("-" * 50)

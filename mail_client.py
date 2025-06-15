@@ -88,7 +88,7 @@ class QQMail:
         获取邮件列表
         :param folder: 邮件文件夹，默认为收件箱
         :param limit: 获取的邮件数量限制
-        :return: 邮件列表
+        :return: 邮件列表，每封邮件包含 id、subject、from、from_email、date
         """
         if not self.connection:
             raise Exception("未连接到邮箱服务器")
@@ -121,10 +121,20 @@ class QQMail:
                 else:
                     from_addr = from_addr[0]
                 
+                # 提取发件人邮箱地址
+                from_email = ""
+                # 尝试从邮件头中获取完整的发件人信息
+                raw_from = email_message.get("From", "")
+                if "<" in raw_from and ">" in raw_from:
+                    from_email = raw_from[raw_from.find("<")+1:raw_from.find(">")]
+                elif "@" in raw_from:
+                    from_email = raw_from
+                
                 mail_list.append({
                     "id": email_id.decode(),
                     "subject": subject,
                     "from": from_addr,
+                    "from_email": from_email,
                     "date": email_message["Date"]
                 })
             
