@@ -55,16 +55,6 @@ cp config.yaml.template config.yaml
 
 ⚠️ 重要：请勿将包含真实账号密码的 `config.yaml` 文件提交到 Git 仓库！
 
-如果已经提交了敏感信息：
-1. 立即更改所有泄露的密码和授权码
-2. 使用以下命令从 Git 历史中删除敏感文件：
-```bash
-git filter-branch --force --index-filter \
-"git rm --cached --ignore-unmatch config.yaml" \
---prune-empty --tag-name-filter cat -- --all
-git push origin --force --all
-```
-
 ## 使用说明
 
 1. 确保已完成配置
