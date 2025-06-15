@@ -4,6 +4,7 @@ from email.header import decode_header
 import os
 from typing import Optional, List, Dict
 import yaml
+import sys
 
 class QQMail:
     def __init__(self, email_address: str = None, password: str = None):
@@ -29,9 +30,17 @@ class QQMail:
         从配置文件加载邮箱配置
         :return: 配置信息字典
         """
-        config_path = os.path.join(os.path.dirname(__file__), 'config.yaml')
+        # 获取可执行文件的实际路径
+        if getattr(sys, 'frozen', False):
+            # 如果是打包后的可执行文件
+            executable_path = sys.executable
+            config_path = os.path.join(os.path.dirname(executable_path), 'config.yaml')
+        else:
+            # 如果是直接运行 Python 脚本
+            config_path = os.path.join(os.path.dirname(__file__), 'config.yaml')
+        
         if not os.path.exists(config_path):
-            raise FileNotFoundError("配置文件不存在，请先创建 config.yaml 文件")
+            raise Exception("配置文件不存在，请先创建 config.yaml 文件")
         
         with open(config_path, 'r', encoding='utf-8') as f:
             config = yaml.safe_load(f)
